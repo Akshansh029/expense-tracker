@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/popover";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Currencies, Currency } from "@/lib/currencies"; // Ensure correct import path
+import { useQuery } from "@tanstack/react-query";
+import SkeletonWrapper from "./SkeletonWrapper";
 
 export function CurrencyComboBox() {
   const [open, setOpen] = React.useState(false);
@@ -27,19 +29,39 @@ export function CurrencyComboBox() {
     null
   );
 
+  const userSettings = useQuery({
+    queryKey: ["userSettings"],
+    queryFn: () =>
+      fetch("/api/user-settings")
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return res.json();
+        })
+        .catch((error) => {
+          console.error("Error fetching user settings:", error);
+          throw error;
+        }),
+  });
+
+  //   console.log("User settings", userSettings);
+
   const buttonText = selectedOption ? selectedOption.label : "+ Set Currency";
 
   return isDesktop ? (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="outline" className="w-full justify-start">
-          {buttonText}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0" align="start">
-        <OptionList setOpen={setOpen} setSelectedOption={setSelectedOption} />
-      </PopoverContent>
-    </Popover>
+    <SkeletonWrapper isLoading={userSettings.isFetching}>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" className="w-full justify-start">
+            {buttonText}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[200px] p-0" align="start">
+          <OptionList setOpen={setOpen} setSelectedOption={setSelectedOption} />
+        </PopoverContent>
+      </Popover>
+    </SkeletonWrapper>
   ) : (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
@@ -74,10 +96,10 @@ function OptionList({
               key={currency.value}
               value={currency.value}
               onSelect={() => {
-                setSelectedOption(currency); // Directly set the currency
+                setSelectedOption(currency);
                 setOpen(false);
               }}
-              className="hover:bg-blue-100" // Add hover effect if needed
+              className="hover:bg-blue-100"
             >
               {currency.label}
             </CommandItem>
