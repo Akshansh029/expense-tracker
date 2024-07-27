@@ -22,12 +22,12 @@ export async function GET(request: NextRequest) {
   const type = queryParams.data;
   const categories = await prisma.category.findMany({
     where: {
-        userId: user.id
-        ...(type && { type }), //if type is defined, include it in the filters
+      userId: user.id,
+      ...(type && { type }), //if type is defined, include it in the filters
     },
     orderBy: {
-        name: "asc",
-    }
+      name: "asc",
+    },
   });
 
   return NextResponse.json(categories);
