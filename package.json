@@ -55,6 +55,7 @@
     "react-day-picker": "^8.10.1",
     "react-dom": "^18",
     "react-hook-form": "^7.52.1",
+    "react-loader-spinner": "^6.1.6",
     "react-resizable-panels": "^2.0.22",
     "react-spinners": "^0.14.1",
     "recharts": "^2.12.7",

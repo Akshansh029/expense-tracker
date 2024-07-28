@@ -1,5 +1,6 @@
 "use server";
 
+import prisma from "@/lib/prisma";
 import {
   CreateCategorySchema,
   CreateCategorySchemaType,
@@ -9,14 +10,24 @@ import { redirect } from "next/navigation";
 
 export async function CreateCategory(form: CreateCategorySchemaType) {
   const parsedBody = CreateCategorySchema.safeParse(form);
-  if (!parsedBody) {
-    throw new Error("bad request");
+
+  if (!parsedBody.success) {
+    throw new Error("Bad request: " + parsedBody.error.message);
   }
+
+  const { name, icon, type } = parsedBody.data;
 
   const user = await currentUser();
   if (!user) {
     redirect("sign-in");
   }
 
-  const { name, icon };
+  return await prisma.category.create({
+    data: {
+      userId: user.id,
+      name,
+      icon,
+      type,
+    },
+  });
 }

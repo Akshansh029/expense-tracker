@@ -31,11 +31,15 @@ import {
 } from "@/schema/categories";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTrigger } from "@radix-ui/react-dialog";
-import { CircleOff, PlusSquare } from "lucide-react";
-import React, { useState } from "react";
+import { CircleOff, Loader2, PlusSquare } from "lucide-react";
+import React, { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { CreateCategory } from "../_actions/categories";
+import { Category } from "@prisma/client";
+import { toast } from "sonner";
 
 interface Props {
   type: TransactionType;
@@ -49,6 +53,44 @@ const CreateCategoryDialog = ({ type }: Props) => {
       type,
     },
   });
+
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: CreateCategory,
+    onSuccess: async (data: Category) => {
+      form.reset({
+        name: "",
+        icon: "",
+        type,
+      });
+
+      toast.success(`Category ${data.name} created successfully 🎉`, {
+        id: "create-category",
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["categories"],
+      });
+
+      setOpen((prev) => !prev);
+    },
+    onError: () => {
+      toast.error("Failed to create category", {
+        id: "create-category",
+      });
+    },
+  });
+
+  const onSubmit = useCallback(
+    (values: CreateCategorySchemaType) => {
+      toast.loading("Creating category...", {
+        id: "create-category",
+      });
+      mutate(values);
+    },
+    [mutate]
+  );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -64,7 +106,7 @@ const CreateCategoryDialog = ({ type }: Props) => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            Create{" "}
+            Create
             <span
               className={cn(
                 "m-1",
@@ -80,7 +122,7 @@ const CreateCategoryDialog = ({ type }: Props) => {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form className="spaec-y-8">
+          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
               name="name"
@@ -128,10 +170,10 @@ const CreateCategoryDialog = ({ type }: Props) => {
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent
-                        className="w-full h-[300px] p-0" // Add a custom class for further styling
+                        className="w-full h-[300px] p-0"
                         style={{
-                          top: "200px", // Move the popover content up
-                          left: "200px", // Adjust horizontal position
+                          top: "200px",
+                          left: "200px",
                         }}
                       >
                         <Picker
@@ -163,7 +205,14 @@ const CreateCategoryDialog = ({ type }: Props) => {
               Cancel
             </Button>
           </DialogClose>
-          <Button>Save</Button>
+          <Button
+            // type="submit"
+            onSubmit={form.handleSubmit(onSubmit)}
+            disabled={isPending}
+          >
+            {!isPending && "Create"}
+            {isPending && <Loader2 className="animate-spin" />}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
