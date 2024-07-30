@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useCallback } from "react";
+import { ReactNode, useCallback, useState } from "react";
 import { TransactionType } from "@/lib/types";
 import React from "react";
 import {
@@ -8,10 +8,10 @@ import {
   DialogClose,
   DialogContent,
   DialogFooter,
+  DialogTitle,
   DialogHeader,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { DialogTitle } from "@radix-ui/react-dialog";
 import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import {
@@ -39,6 +39,10 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { CreateTransaction } from "../_actions/transactions";
+import { toast } from "sonner";
+import { DateToUTCDate } from "@/lib/helpers";
 
 interface props {
   trigger: ReactNode;
@@ -54,6 +58,7 @@ const TransactionDialog = ({ trigger, type }: props) => {
     },
   });
 
+  const [open, setOpen] = useState(false);
   const handleCategoryChange = useCallback(
     (value: string) => {
       form.setValue("category", value);
@@ -61,8 +66,60 @@ const TransactionDialog = ({ trigger, type }: props) => {
     [form]
   );
 
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: CreateTransaction,
+    onSuccess: () => {
+      toast.success("Transaction created successfully 🎉", {
+        id: "create-transaction",
+      });
+
+      form.reset({
+        type: type,
+        description: "",
+        amount: 0,
+        date: new Date(),
+        category: undefined,
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["overview"],
+      });
+
+      setOpen((prev) => !prev);
+    },
+    onError: () => {
+      toast.error("Error creating transaction 😞", {
+        id: "create-transaction",
+      });
+
+      form.reset({
+        type: type,
+        description: "",
+        amount: 0,
+        date: new Date(),
+        category: undefined,
+      });
+    },
+  });
+
+  const onSubmit = useCallback(
+    (values: CreateTransactionSchemaType) => {
+      toast.loading("Creating transactions...", {
+        id: "create-transaction",
+      });
+
+      mutate({
+        ...values,
+        date: DateToUTCDate(values.date),
+      });
+    },
+    [mutate]
+  );
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -80,7 +137,7 @@ const TransactionDialog = ({ trigger, type }: props) => {
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
               name="description"
@@ -101,12 +158,12 @@ const TransactionDialog = ({ trigger, type }: props) => {
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Amount</FormLabel>
                   <FormControl>
                     <Input defaultValue={0} type="number" {...field} />
                   </FormControl>
                   <FormDescription>
-                    Transaction description (required)
+                    Transaction amount (required)
                   </FormDescription>
                 </FormItem>
               )}
