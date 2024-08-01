@@ -35,7 +35,7 @@ const StatsCards = ({ from, to, userSettings }: Props) => {
 
   return (
     <div className="relative flex w-full flex-wrap gap-2 md:flex-nowrap">
-      <SkeletonWrapper isLoading={statsQuery.isPending}>
+      <SkeletonWrapper fullWidth={true} isLoading={statsQuery.isPending}>
         <StatCard
           formatter={formatter}
           value={income}
@@ -45,7 +45,7 @@ const StatsCards = ({ from, to, userSettings }: Props) => {
           }
         />
       </SkeletonWrapper>
-      <SkeletonWrapper isLoading={statsQuery.isPending}>
+      <SkeletonWrapper fullWidth={true} isLoading={statsQuery.isPending}>
         <StatCard
           formatter={formatter}
           value={expense}
@@ -55,7 +55,7 @@ const StatsCards = ({ from, to, userSettings }: Props) => {
           }
         />
       </SkeletonWrapper>
-      <SkeletonWrapper isLoading={statsQuery.isPending}>
+      <SkeletonWrapper fullWidth={true} isLoading={statsQuery.isPending}>
         <StatCard
           formatter={formatter}
           value={balance}

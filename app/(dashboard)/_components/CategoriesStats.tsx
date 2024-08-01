@@ -2,6 +2,7 @@
 import { GetCategoriesStatsResponseType } from "@/app/api/stats/categories/route";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DateToUTCDate, GetFormatterForCurrency } from "@/lib/helpers";
 import { TransactionType } from "@/lib/types";
@@ -17,7 +18,13 @@ interface Props {
 
 const CategoriesStats = ({ userSettings, from, to }: Props) => {
   const statsQuery = useQuery({
-    queryKey: ["overview", "stats", "categories", from, to],
+    queryKey: [
+      "overview",
+      "stats",
+      "categories",
+      from.toISOString(),
+      to.toISOString(),
+    ],
     queryFn: () =>
       fetch(
         `/api/stats/categories?from=${DateToUTCDate(from)}&to=${DateToUTCDate(
@@ -71,7 +78,9 @@ function CatogoriesCard({
   return (
     <Card className="h-80 w-full">
       <CardHeader>
-        <CardTitle className="grid grid-flow-row justify-between gap-2 text-muted-foreground md:grid-flex-col"></CardTitle>
+        <CardTitle className="grid grid-flow-row justify-between gap-2 text-muted-foreground md:grid-flex-col">
+          {type === "income" ? "Incomes" : "Expenses"} by category
+        </CardTitle>
       </CardHeader>
       <div className="flex items-center justify-between gap-2">
         {filteredData.length === 0 && (
@@ -85,18 +94,32 @@ function CatogoriesCard({
         )}
 
         {filteredData.length > 0 && (
-          <ScrollArea className="h-16 w-full px-4">
-            <div className="flex w-full flex-col gap-4 p-4">
+          <ScrollArea className="h-32 w-full px-4">
+            <div className="flex w-full flex-col gap-4 p-2">
               {filteredData.map((item) => {
                 const amount = item._sum.amount || 0;
                 const percentage = (amount * 100) / (total || amount);
                 return (
                   <div className="flex flex-col gap-2" key={item.category}>
                     <div className="flex items-center justify-between">
-                      <span className="flex items-center text-gray-400">
+                      <span className="flex items-center text-gray-400s">
                         {item.categoryIcon} {item.category}
+                        <span className="ml-2 text-sm text-muted-foreground">
+                          ({percentage.toFixed(0)}%)
+                        </span>
+                      </span>
+
+                      <span className="text-sm text-gray-400">
+                        {formatter.format(amount)}
                       </span>
                     </div>
+
+                    <Progress
+                      value={percentage}
+                      indicator={
+                        type === "income" ? "bg-emerald-400" : "bg-red-400"
+                      }
+                    />
                   </div>
                 );
               })}
