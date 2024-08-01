@@ -2,11 +2,13 @@
 
 import { GetBalanceStatsResponseType } from "@/app/api/stats/balance/route";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
+import { Card } from "@/components/ui/card";
 import { DateToUTCDate, GetFormatterForCurrency } from "@/lib/helpers";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
-import { TrendingUp } from "lucide-react";
-import React, { useMemo } from "react";
+import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
+import React, { useCallback, useMemo } from "react";
+import CountUp from "react-countup";
 
 interface Props {
   from: Date;
@@ -43,6 +45,26 @@ const StatsCards = ({ from, to, userSettings }: Props) => {
           }
         />
       </SkeletonWrapper>
+      <SkeletonWrapper isLoading={statsQuery.isPending}>
+        <StatCard
+          formatter={formatter}
+          value={expense}
+          title="Expense"
+          icon={
+            <TrendingDown className="h-12 w-12 items-center rounded-lg p-2 text-red-500 bg-red-400/10" />
+          }
+        />
+      </SkeletonWrapper>
+      <SkeletonWrapper isLoading={statsQuery.isPending}>
+        <StatCard
+          formatter={formatter}
+          value={balance}
+          title="Balance"
+          icon={
+            <Wallet className="h-12 w-12 items-center rounded-lg p-2 text-violet-500 bg-violet-400/10" />
+          }
+        />
+      </SkeletonWrapper>
     </div>
   );
 };
@@ -59,4 +81,28 @@ function StatCard({
   value: number;
   title: string;
   icon: React.ReactNode;
-});
+}) {
+  const formFn = useCallback(
+    (value: number) => {
+      return formatter.format(value);
+    },
+    [formatter]
+  );
+
+  return (
+    <Card className="flex h-24 w-full items-center gap-2 p-4">
+      {icon}
+      <div className="flex flex-col items-start gap-0">
+        <p className="text-muted-foreground">{title}</p>
+        <CountUp
+          preserveValue
+          redraw={false}
+          end={value}
+          decimals={2}
+          formattingFn={formFn}
+          className="text-2xl"
+        />
+      </div>
+    </Card>
+  );
+}
