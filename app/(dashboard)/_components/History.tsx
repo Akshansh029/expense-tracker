@@ -1,17 +1,35 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { UserSettings } from "@prisma/client";
-import { Period, TimeframeType } from "@/lib/types";
+import { Period, Timeframe } from "@/lib/types";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import HistoryPeriodSelector from "./HistoryPeriodSelector";
+import { GetFormatterForCurrency } from "@/lib/helpers";
+import { useQuery } from "@tanstack/react-query";
 
 const History = ({ userSettings }: { userSettings: UserSettings }) => {
-  const [timeFrame, setTimeFrame] = useState<TimeframeType>("month");
+  const [timeFrame, setTimeFrame] = useState<Timeframe>("month");
   const [period, setPeriod] = useState<Period>({
     year: new Date().getFullYear(),
     month: new Date().getMonth(),
   });
+
+  const formatter = useMemo(() => {
+    return GetFormatterForCurrency(userSettings.currency);
+  }, [userSettings.currency]);
+
+  const historyDataQuery = useQuery({
+    queryKey: ["overview", "history", timeFrame, period],
+    queryFn: () =>
+      fetch(
+        `/api/history-data?timeframe=${timeFrame}&year=${period.year}&month=${period.month}`
+      ).then((res) => res.json()),
+  });
+
+  const dataAvailable =
+    historyDataQuery.data && historyDataQuery.data.length > 0;
 
   return (
     <div className="container">
@@ -23,7 +41,7 @@ const History = ({ userSettings }: { userSettings: UserSettings }) => {
               period={period}
               setPeriod={setPeriod}
               timeframe={timeFrame}
-              setTimeFrame={setTimeFrame}
+              setTimeframe={setTimeFrame}
             />
 
             <div className="flex h-10 gap-2">
