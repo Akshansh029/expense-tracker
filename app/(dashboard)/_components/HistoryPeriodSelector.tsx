@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Period, Timeframe } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
+
 interface Props {
   period: Period;
   setPeriod: (period: Period) => void;
@@ -57,7 +58,7 @@ const HistoryPeriodSelector = ({
             isLoading={historyPeriods.isFetching}
             fullWidth={false}
           >
-            <MonthSelector period={period} setPeriod={setPeriod} />
+            <MonthSelector period={period} setPeriod={setPeriod} years={[]} />
           </SkeletonWrapper>
         )}
       </div>

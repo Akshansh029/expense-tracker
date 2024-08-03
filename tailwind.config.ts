@@ -1,13 +1,13 @@
-import type { Config } from "tailwindcss"
+import type { Config } from "tailwindcss";
 
 const config = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-	],
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -18,6 +18,27 @@ const config = {
       },
     },
     extend: {
+      scrollbar: {
+        default: {
+          // Default scrollbar styles
+          width: "8px", // Adjust the width of the scrollbar
+          track: "rounded-md bg-gray-200", // Customize the track
+          thumb: "rounded-md bg-gray-400", // Customize the thumb
+          hover: "bg-gray-500", // Customize the thumb on hover
+        },
+        thin: {
+          width: "4px",
+          track: "rounded-full bg-gray-100",
+          thumb: "rounded-full bg-gray-300",
+          hover: "bg-gray-400",
+        },
+        custom: {
+          width: "6px",
+          track: "rounded-lg bg-neutral-200 dark:bg-neutral-700",
+          thumb: "rounded-lg bg-neutral-400 dark:bg-neutral-500",
+          hover: "bg-neutral-500 dark:bg-neutral-600",
+        },
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -74,7 +95,13 @@ const config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
-} satisfies Config
+  plugins: [
+    require("tailwindcss-animate"),
+    require("tailwind-scrollbar")({
+      // Optional customization
+      nocompatible: true, // Disable compatibility mode
+    }),
+  ],
+} satisfies Config;
 
-export default config
+export default config;

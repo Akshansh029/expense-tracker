@@ -76,7 +76,7 @@ function CatogoriesCard({
   );
 
   return (
-    <Card className="h-80 w-full">
+    <Card className="h-80 w-full overflow-y-auto scrollbar scrollbar-custom">
       <CardHeader>
         <CardTitle className="grid grid-flow-row justify-between gap-2 text-muted-foreground md:grid-flex-col">
           {type === "income" ? "Incomes" : "Expenses"} by category
@@ -94,7 +94,7 @@ function CatogoriesCard({
         )}
 
         {filteredData.length > 0 && (
-          <ScrollArea className="h-32 w-full px-4">
+          <ScrollArea className="h-[100%] w-full px-4 ">
             <div className="flex w-full flex-col gap-4 p-2">
               {filteredData.map((item) => {
                 const amount = item._sum.amount || 0;
