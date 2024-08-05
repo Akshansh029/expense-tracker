@@ -20,7 +20,7 @@ interface Props {
 
 const Overview = ({ userSettings }: Props) => {
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
-    from: endOfMonth(subMonths(new Date(), 1)),
+    from: startOfMonth(new Date()),
     to: new Date(),
   });
 
