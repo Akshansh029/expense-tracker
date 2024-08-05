@@ -3,7 +3,12 @@
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { MAX_DATE_RANGE_DAYS } from "@/lib/constants";
 import { UserSettings } from "@prisma/client";
-import { differenceInDays, startOfMonth } from "date-fns";
+import {
+  differenceInDays,
+  endOfMonth,
+  startOfMonth,
+  subMonths,
+} from "date-fns";
 import { useState } from "react";
 import { toast } from "sonner";
 import StatsCards from "./StatsCards";
@@ -15,7 +20,7 @@ interface Props {
 
 const Overview = ({ userSettings }: Props) => {
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
-    from: startOfMonth(new Date()),
+    from: endOfMonth(subMonths(new Date(), 1)),
     to: new Date(),
   });
 

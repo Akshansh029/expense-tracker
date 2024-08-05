@@ -65,7 +65,7 @@ function CategoryList({ type }: { type: TransactionType }) {
   const dataAvailable = categoriesQuery.data && categoriesQuery.data.length > 0;
 
   return (
-    <SkeletonWrapper isLoading={categoriesQuery.isFetching}>
+    <SkeletonWrapper isLoading={categoriesQuery.isLoading}>
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between gap-2">
@@ -140,7 +140,7 @@ function CategoryCard({ category }: { category: Category }) {
         category={category}
         trigger={
           <Button
-            className="flex w-full border-separate items-center gap-2 rounded-t-none text-muted-foreground hover:bg-red-500/20"
+            className="flex w-full border-separate items-center gap-2 rounded-t-none text-muted-foreground hover:bg-red-700"
             variant={"secondary"}
           >
             <TrashIcon className="h-4 w-4" />
