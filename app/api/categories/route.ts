@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const paramType = searchParams.get("type");
+  console.log(paramType);
 
   const validator = z.enum(["expense", "income"]).nullable();
 

@@ -33,6 +33,8 @@ const CategoriesStats = ({ userSettings, from, to }: Props) => {
       ).then((res) => res.json()),
   });
 
+  // console.log(statsQuery.data);
+
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(userSettings.currency);
   }, [userSettings.currency]);
@@ -70,6 +72,7 @@ function CatogoriesCard({
   const filteredData = Array.isArray(data)
     ? data.filter((el) => el.type === type)
     : [];
+  // const filteredData = data.filter((el) => el.type === type);
   const total = filteredData.reduce(
     (acc, el) => acc + (el._sum?.amount || 0),
     0
