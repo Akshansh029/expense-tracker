@@ -33,8 +33,6 @@ const CategoriesStats = ({ userSettings, from, to }: Props) => {
       ).then((res) => res.json()),
   });
 
-  // console.log(statsQuery.data);
-
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(userSettings.currency);
   }, [userSettings.currency]);
