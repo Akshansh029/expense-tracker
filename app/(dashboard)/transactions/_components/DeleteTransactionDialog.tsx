@@ -54,7 +54,9 @@ const DeleteTransactionDialog = ({ open, setOpen, transactionId }: Props) => {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={() => setOpen(false)}>
+            Cancel
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={() => {
               toast.loading("Deleting transaction...", {

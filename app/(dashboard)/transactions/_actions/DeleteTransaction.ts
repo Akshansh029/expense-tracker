@@ -7,70 +7,90 @@ import { redirect } from "next/navigation";
 export async function DeleteTransaction(id: string) {
   const user = await currentUser();
   if (!user) {
+    console.error("User not found, redirecting to sign-in.");
     redirect("/sign-in");
   }
 
   const transaction = await prisma.transaction.findUnique({
     where: {
-      userId: user.id,
       id,
     },
   });
 
-  if (!transaction) {
-    throw new Error("bad request");
+  if (!transaction || transaction.userId !== user.id) {
+    console.error("Transaction not found or unauthorized access.");
+    throw new Error("Transaction not found or unauthorized access.");
   }
 
-  await prisma.$transaction([
-    prisma.transaction.delete({
-      where: {
-        id,
-        userId: user.id,
-      },
-    }),
+  const day = transaction.date.getUTCDate();
+  const month = transaction.date.getUTCMonth() + 1;
+  const year = transaction.date.getUTCFullYear();
 
-    prisma.monthHistory.update({
-      where: {
-        day_month_year_userId: {
-          userId: user.id,
-          day: transaction.date.getUTCDate(),
-          month: transaction.date.getUTCMonth(),
-          year: transaction.date.getUTCFullYear(),
+  const incomeChange = transaction.type === "income" ? -transaction.amount : 0;
+  const expensesChange =
+    transaction.type === "expense" ? -transaction.amount : 0;
+
+  try {
+    await prisma.$transaction([
+      prisma.transaction.delete({
+        where: {
+          id,
         },
-      },
-      data: {
-        ...(transaction.type === "expense" && {
-          expense: {
-            decrement: transaction.amount,
+      }),
+
+      prisma.monthHistory.upsert({
+        where: {
+          day_month_year_userId: {
+            userId: user.id,
+            day,
+            month,
+            year,
           },
-        }),
-        ...(transaction.type === "income" && {
-          income: {
-            decrement: transaction.amount,
-          },
-        }),
-      },
-    }),
-    prisma.yearHistory.update({
-      where: {
-        month_year_userId: {
-          userId: user.id,
-          month: transaction.date.getUTCMonth(),
-          year: transaction.date.getUTCFullYear(),
         },
-      },
-      data: {
-        ...(transaction.type === "expense" && {
-          expense: {
-            decrement: transaction.amount,
-          },
-        }),
-        ...(transaction.type === "income" && {
+        update: {
           income: {
-            decrement: transaction.amount,
+            increment: incomeChange,
           },
-        }),
-      },
-    }),
-  ]);
+          expenses: {
+            increment: expensesChange,
+          },
+        },
+        create: {
+          userId: user.id,
+          day,
+          month,
+          year,
+          income: incomeChange,
+          expenses: expensesChange,
+        },
+      }),
+
+      prisma.yearHistory.upsert({
+        where: {
+          month_year_userId: {
+            userId: user.id,
+            month,
+            year,
+          },
+        },
+        update: {
+          income: {
+            increment: incomeChange,
+          },
+          expenses: {
+            increment: expensesChange,
+          },
+        },
+        create: {
+          userId: user.id,
+          month,
+          year,
+          income: incomeChange,
+          expenses: expensesChange,
+        },
+      }),
+    ]);
+  } catch (error) {
+    throw new Error("Failed to delete transaction.");
+  }
 }

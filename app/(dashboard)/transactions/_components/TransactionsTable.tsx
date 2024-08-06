@@ -308,32 +308,33 @@ function RowActions({ transaction }: { transaction: TransactionHistorRow }) {
 
   return (
     <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant={"ghost"} className="h-12 w-12">
+            <span className="sr-only">Open now</span>
+            <MoreHorizontal className="h-8 w-8 mx-auto" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="flex items-center gap-2"
+            onSelect={() => {
+              setShowDeleteDialog((prev) => !prev);
+            }}
+          >
+            <TrashIcon className="h-4 w-4 text-muted-foreground" />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <DeleteTransactionDialog
         open={showDeleteDialog}
         setOpen={setShowDeleteDialog}
         transactionId={transaction.id}
       >
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant={"ghost"} className="h-8 w-8">
-              <span className="sr-only">Open now</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="flex items-center gap-2"
-              onSelect={() => {
-                setShowDeleteDialog((prev) => !prev);
-              }}
-            >
-              <TrashIcon className="h-4 w-4 text-muted-foreground" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* You can render something here if you want */}
       </DeleteTransactionDialog>
     </>
   );
